@@ -1,0 +1,34 @@
+
+# Blueprint para desplegar el backend y frontend en Render
+
+services:
+  # Servicio para el Backend (Node.js con Express)
+  - type: web
+    name: backend-system-accountant
+    runtime: node
+    # Directorio raíz del servicio, relativo a la raíz del repositorio
+    rootDir: ./backennd-system-accountant
+    # Comando para instalar dependencias
+    buildCommand: "npm install"
+    # Comando para iniciar el servidor
+    startCommand: "npm start"
+    # Variables de entorno
+    envVars:
+      - key: NODE_VERSION
+        value: "20" # Especifica una versión LTS de Node.js
+
+  # Servicio para el Frontend (Sitio Estático con React y Vite)
+  - type: static
+    name: frontend-system-accountant
+    # Directorio raíz del servicio, relativo a la raíz del repositorio
+    rootDir: ./frontend-system-accountant
+    # Comando para instalar dependencias y construir el sitio
+    buildCommand: "npm install && npm run build"
+    # Directorio donde se encuentran los archivos estáticos después del build
+    publishDir: dist
+    # Regla de reescritura para Single-Page Applications (SPA)
+    # Esto asegura que todas las rutas sean manejadas por index.html
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
