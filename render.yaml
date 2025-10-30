@@ -18,7 +18,8 @@ services:
         value: "20" # Especifica una versión LTS de Node.js
 
   # Servicio para el Frontend (Sitio Estático con React y Vite)
-  - type: static_site
+  - type: web
+    runtime: static
     name: frontend-system-accountant
     # Directorio raíz del servicio, relativo a la raíz del repositorio
     rootDir: ./frontend-system-accountant
