@@ -18,14 +18,15 @@ services:
         value: "20" # Especifica una versión LTS de Node.js
 
   # Servicio para el Frontend (Sitio Estático con React y Vite)
-  - type: static 
+  - type: web
     name: frontend-system-accountant
+    runtime: static
     # Directorio raíz del servicio, relativo a la raíz del repositorio
     rootDir: ./frontend-system-accountant
     # Comando para instalar dependencias y construir el sitio
     buildCommand: "npm install && npm run build"
     # Directorio donde se encuentran los archivos estáticos después del build
-    publishDir: dist
+    staticPublishPath: ./dist
     # Regla de reescritura para Single-Page Applications (SPA)
     # Esto asegura que todas las rutas sean manejadas por index.html
     routes:
