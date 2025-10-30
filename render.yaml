@@ -6,6 +6,7 @@ services:
   - type: web
     name: backend-system-accountant
     runtime: node
+    plan: free
     # Directorio raíz del servicio, relativo a la raíz del repositorio
     rootDir: ./backennd-system-accountant
     # Comando para instalar dependencias
@@ -21,6 +22,7 @@ services:
   - type: web
     name: frontend-system-accountant
     runtime: static
+    plan: free
     # Directorio raíz del servicio, relativo a la raíz del repositorio
     rootDir: ./frontend-system-accountant
     # Comando para instalar dependencias y construir el sitio
