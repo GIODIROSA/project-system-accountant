@@ -1,7 +1,11 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const pool = require('./db'); // Importar la conexión a PostgreSQL
 const app = express();
 const port = process.env.PORT || 3000;
+
+// URL del webhook de N8N (configurable via variable de entorno)
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://matiasknd.app.n8n.cloud/webhook/nuevo-pedido';
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -44,13 +48,29 @@ app.post('/api/pedidos-test', async (req, res) => {
       fecha: new Date().toISOString()
     };
 
-    // IMPORTANTE: Por ahora solo devolvemos el pedido
-    // En el siguiente paso, agregaremos la llamada a N8N
+    // Notificar a N8N sobre el nuevo pedido
+    try {
+      console.log('Notificando a N8N:', N8N_WEBHOOK_URL);
+      const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedidoData)
+      });
+
+      if (n8nResponse.ok) {
+        console.log('✅ N8N notificado exitosamente');
+      } else {
+        console.error('⚠️ Error al notificar a N8N:', n8nResponse.status);
+      }
+    } catch (n8nError) {
+      // No fallar si N8N no responde, solo loggear
+      console.error('⚠️ No se pudo notificar a N8N:', n8nError.message);
+    }
+
     res.json({
       success: true,
-      message: 'Pedido registrado (modo prueba)',
-      pedido: pedidoData,
-      nota: 'En el siguiente paso conectaremos con N8N'
+      message: 'Pedido registrado y N8N notificado',
+      pedido: pedidoData
     });
 
   } catch (error) {
