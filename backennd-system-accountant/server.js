@@ -112,7 +112,7 @@ app.post('/api/pedidos-test', async (req, res) => {
       id: pedidoGuardado.id, // ID real de PostgreSQL
       cliente: pedidoGuardado.cliente,
       total: parseFloat(pedidoGuardado.total),
-      productos: JSON.parse(pedidoGuardado.productos),
+      productos: pedidoGuardado.productos, // JSONB ya viene como objeto
       fecha: pedidoGuardado.fecha
     };
 
@@ -160,12 +160,12 @@ app.get('/api/pedidos-test', async (req, res) => {
       'SELECT * FROM pedidos ORDER BY fecha DESC'
     );
 
-    // Parsear los productos de cada pedido
+    // Formatear los productos de cada pedido
     const pedidos = result.rows.map(pedido => ({
       id: pedido.id,
       cliente: pedido.cliente,
       total: parseFloat(pedido.total),
-      productos: JSON.parse(pedido.productos),
+      productos: pedido.productos, // JSONB ya viene como objeto
       fecha: pedido.fecha
     }));
 
@@ -198,13 +198,13 @@ app.get('/api/pedidos-test/:id', async (req, res) => {
       });
     }
 
-    // Obtener el pedido y parsear los productos
+    // Obtener el pedido y formatear los datos
     const pedido = result.rows[0];
     const pedidoData = {
       id: pedido.id,
       cliente: pedido.cliente,
       total: parseFloat(pedido.total),
-      productos: JSON.parse(pedido.productos),
+      productos: pedido.productos, // JSONB ya viene como objeto
       fecha: pedido.fecha
     };
 
