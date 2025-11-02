@@ -31,59 +31,6 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-// ENDPOINT TEMPORAL: Inicializar la base de datos
-// ⚠️ ELIMINAR DESPUÉS DE USAR (solo se usa una vez)
-app.get('/init-db', async (req, res) => {
-  try {
-    console.log('🔧 Inicializando base de datos...');
-
-    // Crear tabla de pedidos
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS pedidos (
-        id SERIAL PRIMARY KEY,
-        cliente VARCHAR(255) NOT NULL,
-        total DECIMAL(10, 2) NOT NULL,
-        productos JSONB NOT NULL,
-        fecha TIMESTAMP DEFAULT NOW(),
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-
-    console.log('✅ Tabla "pedidos" creada correctamente');
-
-    // Verificar que la tabla existe
-    const result = await pool.query(`
-      SELECT table_name
-      FROM information_schema.tables
-      WHERE table_schema = 'public'
-      AND table_name = 'pedidos'
-    `);
-
-    // Mostrar estructura de la tabla
-    const columns = await pool.query(`
-      SELECT column_name, data_type, is_nullable
-      FROM information_schema.columns
-      WHERE table_name = 'pedidos'
-      ORDER BY ordinal_position
-    `);
-
-    res.json({
-      success: true,
-      message: '✅ Base de datos inicializada correctamente',
-      tabla: result.rows.length > 0 ? 'pedidos creada' : 'error',
-      estructura: columns.rows,
-      nota: 'IMPORTANTE: Elimina este endpoint después de usarlo por seguridad'
-    });
-
-  } catch (error) {
-    console.error('❌ Error al inicializar la base de datos:', error);
-    res.status(500).json({
-      error: error.message,
-      hint: 'Verifica que DATABASE_URL esté configurado correctamente'
-    });
-  }
-});
-
 // Endpoint para crear un pedido (guarda en PostgreSQL y notifica a N8N)
 app.post('/api/pedidos-test', async (req, res) => {
   const { cliente, total, productos } = req.body;
