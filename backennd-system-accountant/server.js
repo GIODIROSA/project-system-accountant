@@ -31,22 +31,39 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-// Endpoint de prueba para simular un pedido (notificará a N8N)
+// Endpoint para crear un pedido (guarda en PostgreSQL y notifica a N8N)
 app.post('/api/pedidos-test', async (req, res) => {
   const { cliente, total, productos } = req.body;
 
   try {
-    // Simular guardado de pedido (por ahora solo logging)
+    // Validar datos requeridos
+    if (!cliente || !total || !productos) {
+      return res.status(400).json({
+        error: 'Faltan datos requeridos: cliente, total, productos'
+      });
+    }
+
     console.log('Nuevo pedido recibido:', { cliente, total, productos });
 
-    // Datos del pedido que enviaremos a N8N
+    // Guardar el pedido en PostgreSQL
+    const result = await pool.query(
+      'INSERT INTO pedidos (cliente, total, productos) VALUES ($1, $2, $3) RETURNING *',
+      [cliente, total, JSON.stringify(productos)]
+    );
+
+    // Obtener el pedido guardado con su ID real
+    const pedidoGuardado = result.rows[0];
+
+    // Preparar datos para N8N
     const pedidoData = {
-      id: Math.floor(Math.random() * 1000), // ID temporal
-      cliente,
-      total,
-      productos,
-      fecha: new Date().toISOString()
+      id: pedidoGuardado.id, // ID real de PostgreSQL
+      cliente: pedidoGuardado.cliente,
+      total: parseFloat(pedidoGuardado.total),
+      productos: JSON.parse(pedidoGuardado.productos),
+      fecha: pedidoGuardado.fecha
     };
+
+    console.log('✅ Pedido guardado en PostgreSQL con ID:', pedidoGuardado.id);
 
     // Notificar a N8N sobre el nuevo pedido
     try {
@@ -69,33 +86,112 @@ app.post('/api/pedidos-test', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Pedido registrado y N8N notificado',
+      message: 'Pedido guardado en la base de datos y N8N notificado',
       pedido: pedidoData
     });
 
   } catch (error) {
     console.error('Error al procesar pedido:', error);
+    res.status(500).json({
+      error: error.message,
+      hint: 'Verifica que la tabla "pedidos" exista en la base de datos'
+    });
+  }
+});
+
+// Endpoint para listar todos los pedidos
+app.get('/api/pedidos-test', async (req, res) => {
+  try {
+    // Consultar todos los pedidos ordenados por fecha descendente
+    const result = await pool.query(
+      'SELECT * FROM pedidos ORDER BY fecha DESC'
+    );
+
+    // Parsear los productos de cada pedido
+    const pedidos = result.rows.map(pedido => ({
+      id: pedido.id,
+      cliente: pedido.cliente,
+      total: parseFloat(pedido.total),
+      productos: JSON.parse(pedido.productos),
+      fecha: pedido.fecha
+    }));
+
+    res.json({
+      total: pedidos.length,
+      pedidos: pedidos
+    });
+  } catch (error) {
+    console.error('Error al listar pedidos:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Endpoint que N8N puede consultar para obtener datos de un pedido
+// Endpoint para obtener un pedido específico por ID
 app.get('/api/pedidos-test/:id', async (req, res) => {
   try {
-    // Simular datos de un pedido
-    const pedido = {
-      id: req.params.id,
-      cliente: 'Cliente Ejemplo',
-      total: 250.50,
-      productos: [
-        { nombre: 'Producto A', cantidad: 2, precio: 100 },
-        { nombre: 'Producto B', cantidad: 1, precio: 50.50 }
-      ],
-      fecha: new Date().toISOString()
+    const pedidoId = req.params.id;
+
+    // Consultar el pedido en PostgreSQL
+    const result = await pool.query(
+      'SELECT * FROM pedidos WHERE id = $1',
+      [pedidoId]
+    );
+
+    // Verificar si el pedido existe
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Pedido no encontrado',
+        id: pedidoId
+      });
+    }
+
+    // Obtener el pedido y parsear los productos
+    const pedido = result.rows[0];
+    const pedidoData = {
+      id: pedido.id,
+      cliente: pedido.cliente,
+      total: parseFloat(pedido.total),
+      productos: JSON.parse(pedido.productos),
+      fecha: pedido.fecha
     };
 
-    res.json(pedido);
+    res.json(pedidoData);
   } catch (error) {
+    console.error('Error al consultar pedido:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint para eliminar un pedido
+app.delete('/api/pedidos-test/:id', async (req, res) => {
+  try {
+    const pedidoId = req.params.id;
+
+    // Verificar si el pedido existe antes de eliminar
+    const checkResult = await pool.query(
+      'SELECT * FROM pedidos WHERE id = $1',
+      [pedidoId]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Pedido no encontrado',
+        id: pedidoId
+      });
+    }
+
+    // Eliminar el pedido
+    await pool.query('DELETE FROM pedidos WHERE id = $1', [pedidoId]);
+
+    console.log('🗑️ Pedido eliminado:', pedidoId);
+
+    res.json({
+      success: true,
+      message: 'Pedido eliminado correctamente',
+      id: pedidoId
+    });
+  } catch (error) {
+    console.error('Error al eliminar pedido:', error);
     res.status(500).json({ error: error.message });
   }
 });
