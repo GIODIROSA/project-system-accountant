@@ -1,10 +1,10 @@
-const pool = require('../db');
-const fetch = require('node-fetch');
+import pool from '../db.js';
+import fetch from 'node-fetch';
 
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://matiasknd.app.n8n.cloud/webhook/nuevo-pedido';
 
 // Controlador para crear un pedido
-const createOrder = async (req, res) => {
+export const createOrder = async (req, res) => {
   const { cliente, total, productos } = req.body;
 
   try {
@@ -62,7 +62,7 @@ const createOrder = async (req, res) => {
 };
 
 // Controlador para listar todos los pedidos
-const getAllOrders = async (req, res) => {
+export const getAllOrders = async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM pedidos ORDER BY fecha DESC');
 
@@ -85,7 +85,7 @@ const getAllOrders = async (req, res) => {
 };
 
 // Controlador para obtener un pedido por ID
-const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
   try {
     const pedidoId = req.params.id;
     const result = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
@@ -114,7 +114,7 @@ const getOrderById = async (req, res) => {
 };
 
 // Controlador para eliminar un pedido por ID
-const deleteOrderById = async (req, res) => {
+export const deleteOrderById = async (req, res) => {
   try {
     const pedidoId = req.params.id;
 
@@ -141,7 +141,7 @@ const deleteOrderById = async (req, res) => {
 };
 
 // Controlador para eliminar TODOS los pedidos
-const resetOrders = async (req, res) => {
+export const resetOrders = async (req, res) => {
   try {
     const deleteResult = await pool.query('DELETE FROM pedidos');
     await pool.query('ALTER SEQUENCE pedidos_id_seq RESTART WITH 1');
@@ -158,13 +158,4 @@ const resetOrders = async (req, res) => {
     console.error('Error al limpiar la base de datos:', error);
     res.status(500).json({ error: error.message });
   }
-};
-
-
-module.exports = {
-  createOrder,
-  getAllOrders,
-  getOrderById,
-  deleteOrderById,
-  resetOrders
 };

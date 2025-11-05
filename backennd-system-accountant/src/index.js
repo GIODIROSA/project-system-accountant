@@ -1,13 +1,10 @@
-require('dotenv').config();
+import 'dotenv/config'
+import express from 'express';
+import ordersRouter from './routers/orders.routers.js';
+import usersRouter from './routers/users.routers.js';
 
-const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Importar enrutadores
-const ordersRouter = require('./routers/orders.routers.js');
-// Aquí puedes importar más enrutadores, por ejemplo: 
-// const usersRouter = require('./routers/users.routers.js');
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -19,7 +16,7 @@ app.get('/', (req, res) => {
 
 // Usar los enrutadores
 app.use('/api/pedidos-test', ordersRouter);
-// app.use('/api/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 
 // Iniciar el servidor

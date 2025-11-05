@@ -1,13 +1,7 @@
-const { Router } = require('express');
+import { Router } from 'express';
 const router = Router();
 
-const {
-  createOrder,
-  getAllOrders,
-  getOrderById,
-  deleteOrderById,
-  resetOrders
-} = require('../controllers/orders.controllers.js');
+import { createOrder, getAllOrders, getOrderById, deleteOrderById, resetOrders } from '../controllers/orders.controllers.js';
 
 // Ruta para obtener todos los pedidos y crear un nuevo pedido
 router.route('/')
@@ -24,4 +18,4 @@ router.route('/:id')
   .delete(deleteOrderById);
 
 
-module.exports = router;
+export default router;

@@ -1,4 +1,5 @@
-const { Pool } = require('pg');
+import pg from 'pg';
+const { Pool } = pg;
 
 // Configuración de la conexión a PostgreSQL
 const pool = new Pool({
@@ -17,4 +18,4 @@ pool.on('error', (err) => {
   console.error('Error en la conexión a PostgreSQL:', err);
 });
 
-module.exports = pool;
+export default pool;
