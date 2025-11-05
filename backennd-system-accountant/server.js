@@ -1,3 +1,6 @@
+// Cargar variables de entorno desde .env
+require('dotenv').config();
+
 const express = require('express');
 const fetch = require('node-fetch');
 const pool = require('./db'); // Importar la conexión a PostgreSQL
@@ -19,13 +22,13 @@ app.get('/test-db', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
     res.json({
-      message: '✅ Conexión exitosa a PostgreSQL',
+      message: 'Conexión exitosa a PostgreSQL',
       timestamp: result.rows[0].now
     });
   } catch (error) {
     console.error('Error al conectar a la base de datos:', error);
     res.status(500).json({
-      message: '❌ Error al conectar a PostgreSQL',
+      message: 'Error al conectar a PostgreSQL',
       error: error.message
     });
   }
@@ -63,7 +66,7 @@ app.post('/api/pedidos-test', async (req, res) => {
       fecha: pedidoGuardado.fecha
     };
 
-    console.log('✅ Pedido guardado en PostgreSQL con ID:', pedidoGuardado.id);
+    console.log('Pedido guardado en PostgreSQL con ID:', pedidoGuardado.id);
 
     // Notificar a N8N sobre el nuevo pedido
     try {
@@ -75,13 +78,13 @@ app.post('/api/pedidos-test', async (req, res) => {
       });
 
       if (n8nResponse.ok) {
-        console.log('✅ N8N notificado exitosamente');
+        console.log('N8N notificado exitosamente');
       } else {
-        console.error('⚠️ Error al notificar a N8N:', n8nResponse.status);
+        console.error('Error al notificar a N8N:', n8nResponse.status);
       }
     } catch (n8nError) {
       // No fallar si N8N no responde, solo loggear
-      console.error('⚠️ No se pudo notificar a N8N:', n8nError.message);
+      console.error('No se pudo notificar a N8N:', n8nError.message);
     }
 
     res.json({
@@ -183,7 +186,7 @@ app.delete('/api/pedidos-test/:id', async (req, res) => {
     // Eliminar el pedido
     await pool.query('DELETE FROM pedidos WHERE id = $1', [pedidoId]);
 
-    console.log('🗑️ Pedido eliminado:', pedidoId);
+    console.log('Pedido eliminado:', pedidoId);
 
     res.json({
       success: true,
@@ -192,6 +195,29 @@ app.delete('/api/pedidos-test/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error al eliminar pedido:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint para eliminar TODOS los pedidos y reiniciar el contador
+app.delete('/api/pedidos-test/all/reset', async (req, res) => {
+  try {
+    // Eliminar todos los pedidos
+    const deleteResult = await pool.query('DELETE FROM pedidos');
+
+    // Reiniciar el contador de IDs a 1
+    await pool.query('ALTER SEQUENCE pedidos_id_seq RESTART WITH 1');
+
+    console.log('Base de datos limpiada. Se eliminaron', deleteResult.rowCount, 'pedidos');
+    console.log('Contador de IDs reiniciado a 1');
+
+    res.json({
+      success: true,
+      message: 'Base de datos limpiada y contador reiniciado',
+      deletedCount: deleteResult.rowCount
+    });
+  } catch (error) {
+    console.error('Error al limpiar la base de datos:', error);
     res.status(500).json({ error: error.message });
   }
 });
