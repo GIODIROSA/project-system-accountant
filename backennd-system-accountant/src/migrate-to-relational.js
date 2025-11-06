@@ -1,5 +1,5 @@
-require('dotenv').config();
-const pool = require('./db');
+import 'dotenv/config';
+import pool from './db.js';
 
 async function migrateToRelational() {
   try {
