@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 
 // Usar los enrutadores
 app.use('/api/pedido', ordersRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/usuario', usersRouter);
 
 
 // Iniciar el servidor
