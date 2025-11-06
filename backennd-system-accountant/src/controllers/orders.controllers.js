@@ -1,161 +1,173 @@
 import pool from '../db.js';
 import fetch from 'node-fetch';
 
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://matiasknd.app.n8n.cloud/webhook/nuevo-pedido';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 
-// Controlador para crear un pedido
+// Helper function to get a connection from the pool
+const getClient = () => pool.connect();
+
+/**
+ * Crea un nuevo pedido.
+ * Espera un cuerpo de solicitud como:
+ * {
+ *   "id_usuario": 1,
+ *   "productos": [
+ *     { "id_producto": 1, "cantidad": 2 },
+ *     { "id_producto": 2, "cantidad": 1 }
+ *   ]
+ * }
+ */
 export const createOrder = async (req, res) => {
-  const { cliente, total, productos } = req.body;
+  const { id_usuario, productos } = req.body;
+
+  if (!id_usuario || !productos || !Array.isArray(productos) || productos.length === 0) {
+    return res.status(400).json({ error: 'Se requieren id_usuario y un array de productos.' });
+  }
+
+  const client = await getClient();
 
   try {
-    if (!cliente || !total || !productos) {
-      return res.status(400).json({
-        error: 'Faltan datos requeridos: cliente, total, productos'
-      });
+    await client.query('BEGIN');
+
+    // 1. Obtener precios de los productos y validar existencias
+    const productIds = productos.map(p => p.id_producto);
+    const pricesResult = await client.query(`SELECT id_producto, precio FROM producto WHERE id_producto = ANY($1::int[])`, [productIds]);
+
+    if (pricesResult.rows.length !== productIds.length) {
+        throw new Error('Uno o más productos no existen.');
     }
 
-    const result = await pool.query(
-      'INSERT INTO pedidos (cliente, total, productos) VALUES ($1, $2, $3) RETURNING *',
-      [cliente, total, JSON.stringify(productos)]
-    );
+    const priceMap = new Map(pricesResult.rows.map(p => [p.id_producto, parseFloat(p.precio)]));
 
-    const pedidoGuardado = result.rows[0];
-
-    const pedidoData = {
-      id: pedidoGuardado.id,
-      cliente: pedidoGuardado.cliente,
-      total: parseFloat(pedidoGuardado.total),
-      productos: pedidoGuardado.productos,
-      fecha: pedidoGuardado.fecha
-    };
-
-    console.log('Pedido guardado en PostgreSQL con ID:', pedidoGuardado.id);
-
-    // Notificar a N8N de forma asíncrona (sin esperar)
-    fetch(N8N_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pedidoData)
-    }).then(n8nResponse => {
-      if (n8nResponse.ok) {
-        console.log('N8N notificado exitosamente');
-      } else {
-        console.error('Error al notificar a N8N:', n8nResponse.status);
+    // 2. Calcular el total y preparar los detalles del pedido
+    let total = 0;
+    const detallesParaInsertar = productos.map(p => {
+      const precio_unitario = priceMap.get(p.id_producto);
+      if (precio_unitario === undefined) {
+        throw new Error(`Producto con id ${p.id_producto} no encontrado.`);
       }
-    }).catch(n8nError => {
-      console.error('No se pudo notificar a N8N:', n8nError.message);
+      total += precio_unitario * p.cantidad;
+      return {
+        id_producto: p.id_producto,
+        cantidad: p.cantidad,
+        precio_unitario: precio_unitario
+      };
     });
+
+    // 3. Insertar el pedido principal
+    const pedidoResult = await client.query(
+      'INSERT INTO pedido (id_usuario, total) VALUES ($1, $2) RETURNING id_pedido, fecha_pedido',
+      [id_usuario, total]
+    );
+    const { id_pedido, fecha_pedido } = pedidoResult.rows[0];
+
+    // 4. Insertar los detalles del pedido
+    const insertPromises = detallesParaInsertar.map(d => {
+        return client.query(
+            'INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario) VALUES ($1, $2, $3, $4)',
+            [id_pedido, d.id_producto, d.cantidad, d.precio_unitario]
+        );
+    });
+    await Promise.all(insertPromises);
+
+    await client.query('COMMIT');
+
+    // 5. Notificar a N8N (opcional, si la URL está configurada)
+    if (N8N_WEBHOOK_URL) {
+        const webhookPayload = {
+            id_pedido,
+            id_usuario,
+            total,
+            fecha_pedido,
+            productos: detallesParaInsertar
+        };
+        fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(webhookPayload)
+        }).catch(err => console.error('Error al notificar a N8N:', err.message));
+    }
 
     res.status(201).json({
-      success: true,
-      message: 'Pedido guardado y notificación a N8N en proceso',
-      pedido: pedidoData
+        success: true,
+        message: 'Pedido creado exitosamente.',
+        id_pedido: id_pedido
     });
 
   } catch (error) {
-    console.error('Error al procesar pedido:', error);
-    res.status(500).json({
-      error: error.message,
-      hint: 'Verifica que la tabla "pedidos" exista en la base de datos'
-    });
+    await client.query('ROLLBACK');
+    console.error('Error al crear pedido:', error);
+    res.status(500).json({ error: 'Error interno del servidor al crear el pedido.', details: error.message });
+  } finally {
+    client.release();
   }
 };
 
-// Controlador para listar todos los pedidos
+const fullOrderQuery = `
+    SELECT
+        p.id_pedido,
+        p.fecha_pedido,
+        p.estado,
+        p.total,
+        json_build_object(
+            'id_usuario', u.id_usuario,
+            'nombre', u.nombre,
+            'apellido', u.apellido,
+            'email', u.email
+        ) as usuario,
+        (SELECT json_agg(
+            json_build_object(
+                'id_producto', pr.id_producto,
+                'nombre', pr.nombre,
+                'cantidad', dp.cantidad,
+                'precio_unitario', dp.precio_unitario
+            )
+        )
+        FROM detalle_pedido dp
+        JOIN producto pr ON dp.id_producto = pr.id_producto
+        WHERE dp.id_pedido = p.id_pedido
+        ) as productos
+    FROM pedido p
+    JOIN usuario u ON p.id_usuario = u.id_usuario
+`;
+
 export const getAllOrders = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM pedidos ORDER BY fecha DESC');
-
-    const pedidos = result.rows.map(pedido => ({
-      id: pedido.id,
-      cliente: pedido.cliente,
-      total: parseFloat(pedido.total),
-      productos: pedido.productos,
-      fecha: pedido.fecha
-    }));
-
-    res.json({
-      total: pedidos.length,
-      pedidos: pedidos
-    });
+    const result = await pool.query(`${fullOrderQuery} ORDER BY p.fecha_pedido DESC`);
+    res.json(result.rows);
   } catch (error) {
-    console.error('Error al listar pedidos:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error al obtener pedidos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
-// Controlador para obtener un pedido por ID
 export const getOrderById = async (req, res) => {
   try {
-    const pedidoId = req.params.id;
-    const result = await pool.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
+    const { id } = req.params;
+    const result = await pool.query(`${fullOrderQuery} WHERE p.id_pedido = $1`, [id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        error: 'Pedido no encontrado',
-        id: pedidoId
-      });
+      return res.status(404).json({ error: 'Pedido no encontrado' });
     }
-
-    const pedido = result.rows[0];
-    const pedidoData = {
-      id: pedido.id,
-      cliente: pedido.cliente,
-      total: parseFloat(pedido.total),
-      productos: pedido.productos,
-      fecha: pedido.fecha
-    };
-
-    res.json(pedidoData);
+    res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error al consultar pedido:', error);
-    res.status(500).json({ error: error.message });
+    console.error(`Error al obtener pedido ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
-// Controlador para eliminar un pedido por ID
 export const deleteOrderById = async (req, res) => {
   try {
-    const pedidoId = req.params.id;
-
-    const result = await pool.query('DELETE FROM pedidos WHERE id = $1 RETURNING *', [pedidoId]);
+    const { id } = req.params;
+    // La tabla detalle_pedido tiene "ON DELETE CASCADE", por lo que los detalles se borrarán automáticamente.
+    const result = await pool.query('DELETE FROM pedido WHERE id_pedido = $1 RETURNING *', [id]);
 
     if (result.rowCount === 0) {
-      return res.status(404).json({
-        error: 'Pedido no encontrado',
-        id: pedidoId
-      });
+      return res.status(404).json({ error: 'Pedido no encontrado' });
     }
-
-    console.log('Pedido eliminado:', pedidoId);
-
-    res.json({
-      success: true,
-      message: 'Pedido eliminado correctamente',
-      id: pedidoId
-    });
+    res.json({ message: 'Pedido eliminado exitosamente', pedido: result.rows[0] });
   } catch (error) {
-    console.error('Error al eliminar pedido:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Controlador para eliminar TODOS los pedidos
-export const resetOrders = async (req, res) => {
-  try {
-    const deleteResult = await pool.query('DELETE FROM pedidos');
-    await pool.query('ALTER SEQUENCE pedidos_id_seq RESTART WITH 1');
-
-    console.log('Base de datos limpiada. Se eliminaron', deleteResult.rowCount, 'pedidos');
-    console.log('Contador de IDs reiniciado a 1');
-
-    res.json({
-      success: true,
-      message: 'Base de datos limpiada y contador reiniciado',
-      deletedCount: deleteResult.rowCount
-    });
-  } catch (error) {
-    console.error('Error al limpiar la base de datos:', error);
-    res.status(500).json({ error: error.message });
+    console.error(`Error al eliminar pedido ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
