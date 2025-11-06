@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // Usar los enrutadores
-app.use('/api/pedidos-test', ordersRouter);
+app.use('/api/pedido', ordersRouter);
 app.use('/api/users', usersRouter);
 
 
