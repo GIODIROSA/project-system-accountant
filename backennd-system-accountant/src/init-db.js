@@ -1,4 +1,4 @@
-import pool from './db.js'; // Asumo que este archivo exporta la pool de conexión a PostgreSQL
+import pool from './db.js'; 
 
 async function initDatabase() {
     try {
@@ -61,8 +61,7 @@ async function initDatabase() {
         `);
         console.log('Tabla "detalle_pedido" creada correctamente.');
         
-        // El resto del código para verificar y mostrar la estructura (opcional)
-        // Puedes adaptar el código de verificación para revisar las nuevas tablas.
+      
         
         console.log('\nBase de datos inicializada correctamente con las 4 tablas.');
         process.exit(0);
