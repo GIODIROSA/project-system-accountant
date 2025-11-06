@@ -8,6 +8,7 @@ const getClient = () => pool.connect();
 
 /**
  * Crea un nuevo pedido.
+ * realizar un post a /api/pedido con el cuerpo adecuado.
  * Espera un cuerpo de solicitud como:
  * {
  *   "id_usuario": 1,
