@@ -1,60 +1,77 @@
-const pool = require('./db');
+import pool from './db.js'; // Asumo que este archivo exporta la pool de conexión a PostgreSQL
 
 async function initDatabase() {
-  try {
-    console.log('Inicializando base de datos...');
+    try {
+        console.log('Inicializando base de datos...');
 
-    // Crear tabla de pedidos
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS pedidos (
-        id SERIAL PRIMARY KEY,
-        cliente VARCHAR(255) NOT NULL,
-        total DECIMAL(10, 2) NOT NULL,
-        productos JSONB NOT NULL,
-        fecha TIMESTAMP DEFAULT NOW(),
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
+        // --- 1. Crear tabla USUARIO ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS usuario (
+                id_usuario SERIAL PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                telefono VARCHAR(50) UNIQUE,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        console.log('Tabla "usuario" creada correctamente.');
 
-    console.log('Tabla "pedidos" creada correctamente');
+        // --- 2. Crear tabla PRODUCTO ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS producto (
+                id_producto SERIAL PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                descripcion TEXT,
+                precio NUMERIC(10, 2) NOT NULL
+            );
+        `);
+        console.log('Tabla "producto" creada correctamente.');
 
-    // Verificar que la tabla existe
-    const result = await pool.query(`
-      SELECT table_name
-      FROM information_schema.tables
-      WHERE table_schema = 'public'
-      AND table_name = 'pedidos'
-    `);
+        // --- 3. Crear tabla PEDIDO (depende de usuario) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS pedido (
+                id_pedido SERIAL PRIMARY KEY,
+                fecha_pedido TIMESTAMP DEFAULT NOW(),
+                estado VARCHAR(50) NOT NULL DEFAULT 'Pendiente',
+                total NUMERIC(10, 2) NOT NULL,
+                id_usuario INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW(),
+                
+                -- Clave Foránea
+                FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario)
+            );
+        `);
+        console.log('Tabla "pedido" creada correctamente.');
 
-    if (result.rows.length > 0) {
-      console.log('Verificación exitosa: tabla "pedidos" existe');
+        // --- 4. Crear tabla DETALLE_PEDIDO (Tabla de relación) ---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS detalle_pedido (
+                id_pedido INTEGER NOT NULL,
+                id_producto INTEGER NOT NULL,
+                cantidad INTEGER NOT NULL,
+                precio_unitario NUMERIC(10, 2) NOT NULL,
+                
+                -- Definición de Claves Foráneas
+                FOREIGN KEY (id_pedido) REFERENCES pedido (id_pedido),
+                FOREIGN KEY (id_producto) REFERENCES producto (id_producto),
+                
+                -- Clave Primaria Compuesta
+                PRIMARY KEY (id_pedido, id_producto)
+            );
+        `);
+        console.log('Tabla "detalle_pedido" creada correctamente.');
+        
+        // El resto del código para verificar y mostrar la estructura (opcional)
+        // Puedes adaptar el código de verificación para revisar las nuevas tablas.
+        
+        console.log('\nBase de datos inicializada correctamente con las 4 tablas.');
+        process.exit(0);
+
+    } catch (error) {
+        console.error('Error al inicializar la base de datos:', error);
+        console.error('\nVerifica la conexión y permisos de PostgreSQL.');
+        process.exit(1);
     }
-
-    // Mostrar estructura de la tabla
-    const columns = await pool.query(`
-      SELECT column_name, data_type, is_nullable
-      FROM information_schema.columns
-      WHERE table_name = 'pedidos'
-      ORDER BY ordinal_position
-    `);
-
-    console.log('\nEstructura de la tabla "pedidos":');
-    columns.rows.forEach(col => {
-      console.log(`  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? '(requerido)' : '(opcional)'}`);
-    });
-
-    console.log('\nBase de datos inicializada correctamente');
-    console.log('Ahora puedes usar Thunder Client para crear pedidos\n');
-
-    process.exit(0);
-  } catch (error) {
-    console.error('Error al inicializar la base de datos:', error);
-    console.error('\nPosibles soluciones:');
-    console.error('  1. Verifica que DATABASE_URL esté configurado en Render');
-    console.error('  2. Verifica que la base de datos PostgreSQL esté activa');
-    console.error('  3. Verifica que tengas permisos para crear tablas\n');
-    process.exit(1);
-  }
 }
 
 initDatabase();
