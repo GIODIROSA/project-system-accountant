@@ -1,34 +1,8 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import type { AuthState } from '../interface/interfaceAuth';
 
-type AuthState = {
-  token: string | null;
-  user: { name: string; isAdmin: boolean } | null;
-  isAuthenticated: boolean;
-  setToken: (token: string) => void;
-  logout: () => void;
-};
-
-export const useAuthStore = create(
-  persist<AuthState>(
-    (set) => ({
-      token: null,
-      user: null,
-      isAuthenticated: false,
-      setToken: (token) => {
-        set({
-          token,
-          isAuthenticated: true,
-          user: { name: 'Admin User', isAdmin: true }, // Placeholder
-        });
-      },
-      logout: () => {
-        set({ token: null, user: null, isAuthenticated: false });
-      },
-    }),
-    {
-      name: 'auth-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-    }
-  )
-);
+export const useAuthStore = create<AuthState>((set) => ({
+  token: null,
+  login: (token) => set({ token }),
+  logout: () => set({ token: null }),
+}));

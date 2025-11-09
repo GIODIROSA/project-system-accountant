@@ -1,16 +1,12 @@
 import { create } from 'zustand';
-import type { Producto } from '../types/Producto';
+import {productosMockUp} from '../services/mockup';
+import type { ProductoStore } from '../interface/interfaceProduct';
 
-type ProductState = {
-  products: Producto[];
-  fetchProducts: () => Promise<void>;
-};
 
-export const useProductStore = create<ProductState>((set) => ({
-  products: [],
-  fetchProducts: async () => {
-    // const products = await getProducts(); // This would call a service
-    // set({ products });
-    console.log('Fetching products...');
+export const useProductoStore = create<ProductoStore>((set) => ({
+  productos: [],
+
+  cargarProductos: () => {
+    set({ productos: productosMockUp });
   },
 }));
