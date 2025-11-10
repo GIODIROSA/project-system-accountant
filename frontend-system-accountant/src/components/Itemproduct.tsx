@@ -17,7 +17,6 @@ export const Itemproduct: React.FC<ItemProductProps> = ({ productos }) => {
           <h2 className="text-xl font-bold mb-2">{producto.nombre}</h2>
           <p className="text-gray-700 flex-grow">{producto.descrip}</p>
           <div className="mt-4 flex justify-between items-center">
-            <span className="text-lg font-semibold">${producto.precio.toFixed(2)}</span>
             <span className={`text-sm font-medium px-2 py-1 rounded-full ${
               producto.stock > 0 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
             }`}>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useProductoStore } from '../store/useProductStore';
-import { Itemproduct } from '../components/itemproduct';
+import { Itemproduct } from '../components/Itemproduct';
+
 
 const Productos: React.FC = () => {
   const productos = useProductoStore((state) => state.productos);
