@@ -1,4 +1,4 @@
-export type Producto = {
+export interface Producto {
   id_producto: number;
   nombre: string;
   descrip: string;
@@ -6,4 +6,9 @@ export type Producto = {
   stock: number;
   activo: boolean;
   createdAt: string;
-};
+}
+
+export interface ProductoStore {
+  productos: Producto[];
+  cargarProductos: () => void;
+}
