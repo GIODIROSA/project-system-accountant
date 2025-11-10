@@ -4,7 +4,7 @@ import type { Order } from '../types/Order';
 
 const OrderForm: React.FC<{ order?: Order; onSave: (order: Omit<Order, 'id_pedido' | 'createdAt'> | Partial<Order>) => void; onCancel: () => void }> = ({ order, onSave, onCancel }) => {
   const [total, setTotal] = useState(order?.total || 0);
-  const [estado, setEstado] = useState(order?.estado || 'pendiente');
+  // const [estado, setEstado] = useState(order?.estado || 'pendiente');
   // Assuming a fixed user for simplicity
   const id_usario = 1;
 
@@ -12,7 +12,7 @@ const OrderForm: React.FC<{ order?: Order; onSave: (order: Omit<Order, 'id_pedid
     e.preventDefault();
     onSave({
       total: Number(total),
-      estado: estado as Order['estado'],
+      // estado: estado as Order['estado'],
       fecha_pedido: new Date().toISOString(),
       id_usario,
     });
@@ -35,12 +35,12 @@ const OrderForm: React.FC<{ order?: Order; onSave: (order: Omit<Order, 'id_pedid
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Estado</label>
-            <select value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full p-2 border rounded">
+            {/* <select value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full p-2 border rounded">
               <option value="pendiente">Pendiente</option>
               <option value="procesado">Procesado</option>
               <option value="completado">Completado</option>
               <option value="cancelado">Cancelado</option>
-            </select>
+            </select> */}
           </div>
           <div className="flex justify-end">
             <button type="button" onClick={onCancel} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">
