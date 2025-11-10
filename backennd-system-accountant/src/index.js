@@ -11,8 +11,14 @@ const port = process.env.PORT || 3000;
 // Middleware para parsear JSON
 app.use(express.json());
 
+const corsOptions = {
+  origin: ['https://frontend-system-accountant.onrender.com', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
+};
+
 // CORS
-app.use(cors())
+app.use(cors(corsOptions))
 
 // Rutas base
 app.get('/', (req, res) => {
