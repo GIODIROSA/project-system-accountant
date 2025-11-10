@@ -2,7 +2,7 @@ import axios from 'axios';
 // import { useAuthStore } from '../store/useAuthStore';
 
 const api = axios.create({
-  baseURL: 'https://backend-system-accountant.onrender.com', // <-- IMPORTANT: Replace with your backend URL
+  baseURL: 'https://backend-system-accountant.onrender.com/api', // <-- IMPORTANT: Replace with your backend URL
   headers: {
     'Content-Type': 'application/json',
   },
