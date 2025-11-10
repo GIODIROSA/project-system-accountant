@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import cors from 'cors';
 import express from 'express';
 import ordersRouter from './routers/orders.routers.js';
 import usersRouter from './routers/users.routers.js';
@@ -9,6 +10,9 @@ const port = process.env.PORT || 3000;
 
 // Middleware para parsear JSON
 app.use(express.json());
+
+// CORS
+app.use(cors())
 
 // Rutas base
 app.get('/', (req, res) => {
