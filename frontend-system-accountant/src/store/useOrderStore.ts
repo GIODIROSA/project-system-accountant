@@ -35,13 +35,18 @@ export const useOrderStore = create<OrderStore>((set) => ({
 
   addPedido: async (user, cart) => {
     try {
+      const total = cart.reduce((acc, item) => acc + parseFloat(item.precio) * item.quantity, 0);
       const newOrder = {
-        id_usario: user.id_usuario,
+        total: total.toFixed(2),
+        id_usuario: user.id_usuario, // <--- Changed here
         productos: cart.map(item => ({
           id_producto: item.id_producto,
+          nombre: item.nombre,
           cantidad: item.quantity,
+          precio_unitario: Number(item.precio),
         })),
       };
+      console.log('Enviando pedido:', newOrder);
       const createdOrder = await createOrder(newOrder);
       set((state) => ({
         orders: [...state.orders, createdOrder],

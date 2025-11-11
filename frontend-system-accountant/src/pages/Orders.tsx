@@ -10,11 +10,12 @@ const UserCheck: React.FC<{ onUserFound: (user: User) => void; onUserNotFound: (
 
   const handleCheckUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = await getUserByEmail(email);
+    const trimmedEmail = email.trim();
+    const user = await getUserByEmail(trimmedEmail);
     if (user) {
       onUserFound(user);
     } else {
-      onUserNotFound(email);
+      onUserNotFound(trimmedEmail);
     }
   };
 
@@ -41,7 +42,12 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newUser = { nombre, apellido, email, telefono };
+    const newUser = { 
+      nombre: nombre.trim(), 
+      apellido: apellido.trim(), 
+      email: email.trim(), 
+      telefono 
+    };
     await registerUser(newUser);
     const user = useUserStore.getState().user;
     if(user) {
@@ -111,7 +117,7 @@ const UserSection: React.FC = () => {
 };
 
 const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => void, user: User | null }> = ({ cart, clearCart, createOrder, user }) => {
-  const total = cart.reduce((acc, item) => acc + item.precio * item.quantity, 0);
+  const total = cart.reduce((acc, item) => acc + parseFloat(item.precio) * item.quantity, 0);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -124,7 +130,7 @@ const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => vo
             {cart.map(item => (
               <li key={item.id_producto} className="flex justify-between items-center mb-2">
                 <span>{item.nombre} x {item.quantity}</span>
-                <span>${(item.precio * item.quantity).toFixed(2)}</span>
+                <span>${(parseFloat(item.precio) * item.quantity).toFixed(2)}</span>
               </li>
             ))}
           </ul>
