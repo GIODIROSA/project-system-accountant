@@ -6,6 +6,7 @@ interface UserStore {
   user: User | null;
   registerUser: (newUser: Omit<User, 'id_usuario' | 'createdAt'>) => Promise<void>;
   fetchUserByEmail: (email: string) => Promise<void>;
+  setUser: (user: User | null) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -27,5 +28,9 @@ export const useUserStore = create<UserStore>((set) => ({
     } catch (error) {
       console.error('Error fetching user by email in store:', error);
     }
+  },
+
+  setUser: (user) => {
+    set({ user });
   }
 }));

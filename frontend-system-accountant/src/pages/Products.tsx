@@ -11,13 +11,13 @@ const Productos: React.FC = () => {
 
   useEffect(() => {
     cargarProductos();
-  }, [cargarProductos]);
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Nuestros Productos</h1>
-        <Link to="/orders" className="bg-blue-500 text-white px-4 py-2 rounded">
+        <Link to="/pedido" className="bg-blue-500 text-white px-4 py-2 rounded">
           Ir al Carrito ({cart.length})
         </Link>
       </div>

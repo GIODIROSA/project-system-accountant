@@ -35,15 +35,11 @@ export const useOrderStore = create<OrderStore>((set) => ({
 
   addPedido: async (user, cart) => {
     try {
-      const total = cart.reduce((acc, item) => acc + item.precio * item.quantity, 0);
       const newOrder = {
-        total: total.toFixed(2),
-        usuario: user,
+        id_usario: user.id_usuario,
         productos: cart.map(item => ({
           id_producto: item.id_producto,
-          nombre: item.nombre,
           cantidad: item.quantity,
-          precio_unitario: item.precio,
         })),
       };
       const createdOrder = await createOrder(newOrder);

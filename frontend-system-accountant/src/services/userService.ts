@@ -13,7 +13,8 @@ export const createUser = async (user: Omit<User, 'id_usuario' | 'createdAt'>): 
 
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
-    const response = await api.get(`/usuario/email/${email}`);
+    const encodedEmail = encodeURIComponent(email);
+    const response = await api.get(`/usuario/email/${encodedEmail}`);
     return response.data;
   } catch (error) {
     if (error.response && error.response.status === 404) {

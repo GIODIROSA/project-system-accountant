@@ -4,7 +4,7 @@ import type { Producto } from "../interface/interfaceProduct";
 export const getProducts = async (): Promise<Producto[]> => {
   try {
     const response = await api.get("/producto");
-    //console.log("RESPUESTA DE DATA:", response.data);
+    console.log("RESPUESTA DE DATA:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);

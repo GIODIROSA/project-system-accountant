@@ -1,15 +1,11 @@
 import api from './api';
 import type { Order } from '../types/Order';
-import type { User } from '../types/Users';
 
 interface NewOrderPayload {
-  total: string;
-  usuario: User;
+  id_usario: number;
   productos: {
     id_producto: number;
-    nombre: string;
     cantidad: number;
-    precio_unitario: number;
   }[];
 }
 
