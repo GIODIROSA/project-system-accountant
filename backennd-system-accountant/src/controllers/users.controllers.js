@@ -25,6 +25,30 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email: rawEmail } = req.params;
+
+    // Sanitizar: remover todos los espacios y convertir a minúsculas
+    const sanitizedEmail = rawEmail.replace(/\s/g, '').toLowerCase();
+
+    // Validar: verificar que el email contiene un '@'
+    if (!sanitizedEmail.includes('@')) {
+      return res.status(400).json({ error: 'Formato de email inválido' });
+    }
+
+    const result = await pool.query('SELECT * FROM usuario WHERE LOWER(email) = $1', [sanitizedEmail]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(`Error al obtener usuario por email ${req.params.email}:`, error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 export const createUser = async (req, res) => {
   const { nombre, apellido, email, telefono } = req.body;
   if (!nombre || !apellido || !email) {

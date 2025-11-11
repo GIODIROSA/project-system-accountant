@@ -1,17 +1,28 @@
 import { create } from 'zustand';
 import { getOrders, createOrder, updateOrder, deleteOrder } from '../services/orderService';
 import type { Order } from '../types/Order';
+import type { Producto } from '../interface/interfaceProduct';
+import type { User } from '../types/Users';
+
+interface CartItem extends Producto {
+  quantity: number;
+}
 
 interface OrderStore {
   orders: Order[];
+  cart: CartItem[];
   cargarPedidos: () => Promise<void>;
-  addPedido: (newOrder: Omit<Order, 'id_pedido' | 'createdAt'>) => Promise<void>;
+  addPedido: (user: User, cart: CartItem[]) => Promise<void>;
   updatePedido: (id: number, updatedOrder: Partial<Order>) => Promise<void>;
   deletePedido: (id: number) => Promise<void>;
+  addToCart: (product: Producto) => void;
+  removeFromCart: (productId: number) => void;
+  clearCart: () => void;
 }
 
 export const useOrderStore = create<OrderStore>((set) => ({
   orders: [],
+  cart: [],
 
   cargarPedidos: async () => {
     try {
@@ -22,11 +33,23 @@ export const useOrderStore = create<OrderStore>((set) => ({
     }
   },
 
-  addPedido: async (newOrder) => {
+  addPedido: async (user, cart) => {
     try {
+      const total = cart.reduce((acc, item) => acc + item.precio * item.quantity, 0);
+      const newOrder = {
+        total: total.toFixed(2),
+        usuario: user,
+        productos: cart.map(item => ({
+          id_producto: item.id_producto,
+          nombre: item.nombre,
+          cantidad: item.quantity,
+          precio_unitario: item.precio,
+        })),
+      };
       const createdOrder = await createOrder(newOrder);
       set((state) => ({
         orders: [...state.orders, createdOrder],
+        cart: [],
       }));
     } catch (error) {
       console.error('Error adding order in store:', error);
@@ -53,5 +76,41 @@ export const useOrderStore = create<OrderStore>((set) => ({
     } catch (error) {
       console.error(`Error deleting order ${id} in store:`, error);
     }
+  },
+
+  addToCart: (product) => {
+    set((state) => {
+      const existingItem = state.cart.find((item) => item.id_producto === product.id_producto);
+      if (existingItem) {
+        return {
+          cart: state.cart.map((item) =>
+            item.id_producto === product.id_producto
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+        };
+      }
+      return { cart: [...state.cart, { ...product, quantity: 1 }] };
+    });
+  },
+
+  removeFromCart: (productId) => {
+    set((state) => {
+      const existingItem = state.cart.find((item) => item.id_producto === productId);
+      if (existingItem && existingItem.quantity > 1) {
+        return {
+          cart: state.cart.map((item) =>
+            item.id_producto === productId
+              ? { ...item, quantity: item.quantity - 1 }
+              : item
+          ),
+        };
+      }
+      return { cart: state.cart.filter((item) => item.id_producto !== productId) };
+    });
+  },
+
+  clearCart: () => {
+    set({ cart: [] });
   },
 }));

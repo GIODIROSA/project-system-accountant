@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { Producto } from '../interface/interfaceProduct';
+import { useOrderStore } from '../store/useOrderStore';
 
 interface ProductCardProps {
   producto: Producto;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ producto }) => {
-  const [quantity, setQuantity] = useState(0);
+  const { cart, addToCart, removeFromCart } = useOrderStore();
+  const cartItem = cart.find(item => item.id_producto === producto.id_producto);
+  const quantity = cartItem ? cartItem.quantity : 0;
 
   const handleIncrease = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
+    addToCart(producto);
   };
 
   const handleDecrease = () => {
-    setQuantity(prevQuantity => Math.max(0, prevQuantity - 1));
+    removeFromCart(producto.id_producto);
   };
 
   return (

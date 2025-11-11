@@ -1,5 +1,17 @@
 import api from './api';
 import type { Order } from '../types/Order';
+import type { User } from '../types/Users';
+
+interface NewOrderPayload {
+  total: string;
+  usuario: User;
+  productos: {
+    id_producto: number;
+    nombre: string;
+    cantidad: number;
+    precio_unitario: number;
+  }[];
+}
 
 export const getOrders = async (): Promise<Order[]> => {
   try {
@@ -11,9 +23,10 @@ export const getOrders = async (): Promise<Order[]> => {
   }
 };
 
-export const createOrder = async (order: Omit<Order, 'id_pedido' | 'createdAt'>): Promise<Order> => {
+export const createOrder = async (order: NewOrderPayload): Promise<Order> => {
   try {
     const response = await api.post('/pedido', order);
+    console.log('crear el pedido:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating order:', error);
