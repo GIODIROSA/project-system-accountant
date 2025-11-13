@@ -26,7 +26,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ producto }) => {
 
       <section className='producto-title-descrip'>
         <h2 className="text-xl font-bold mb-2 color-primary">{producto.nombre}</h2>
-        <p className="text-gray-700 flex-grow color-primary">{producto.descrip}</p>
+        <p className="text-gray-700 flex-grow color-secondary">{producto.descrip}</p>
       </section>
 
       <div className="mt-4 flex justify-between items-center">

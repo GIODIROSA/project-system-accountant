@@ -3,10 +3,18 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Montserrat", monospace;
+    font-family: "Montserrat", monospace; 
 }
 
 .color-primary {
     color: #4d303f;
 }   
 
+.color-secondary {
+    color: #fc5a50;
+}
+
+.bg-button{
+    background-color: #bddfab;
+    color: #fff;
+}

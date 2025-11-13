@@ -22,7 +22,7 @@ const Productos: React.FC = () => {
 
       <div className="producto-container-header">
         <h1 className="color-primary">Nuestros Productos</h1>
-        <button className='producto-button'>
+        <button className='producto-button bg-button'>
           <Link to="/pedido" className="">
             Ir al Carrito ({cart.length})
           </Link>
@@ -34,7 +34,7 @@ const Productos: React.FC = () => {
         {productos.length > 0 ? (
           <Itemproduct productos={productos} />
         ) : (
-          <p>Cargando productos...</p>
+          <p className='color-primary'>Cargando productos...</p>
         )}
 
       </section>
