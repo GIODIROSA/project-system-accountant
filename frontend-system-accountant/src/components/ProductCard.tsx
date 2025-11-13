@@ -2,6 +2,7 @@ import React from 'react';
 import type { Producto } from '../interface/interfaceProduct';
 import { useOrderStore } from '../store/useOrderStore';
 import '../assets/styles/products.css';
+import '../assets/styles/global.css';
 
 interface ProductCardProps {
   producto: Producto;
@@ -24,8 +25,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ producto }) => {
     <div key={producto.id_producto} className="producto-card">
 
       <section className='producto-title-descrip'>
-        <h2 className="text-xl font-bold mb-2">{producto.nombre}</h2>
-        <p className="text-gray-700 flex-grow">{producto.descrip}</p>
+        <h2 className="text-xl font-bold mb-2 color-primary">{producto.nombre}</h2>
+        <p className="text-gray-700 flex-grow color-primary">{producto.descrip}</p>
       </section>
 
       <div className="mt-4 flex justify-between items-center">

@@ -6,6 +6,7 @@ import { useOrderStore } from '../store/useOrderStore';
 
 // style
 import '../assets/styles/products.css';
+import '../assets/styles/global.css';
 
 const Productos: React.FC = () => {
   const productos = useProductoStore((state) => state.productos);
@@ -19,8 +20,8 @@ const Productos: React.FC = () => {
   return (
     <div className="producto-container producto-layout mx-auto p-4">
 
-      <div className="flex flex-col mb-6">
-        <h1 className="text-3xl font-bold">Nuestros Productos</h1>
+      <div className="producto-container-header">
+        <h1 className="color-primary">Nuestros Productos</h1>
         <button className='producto-button'>
           <Link to="/pedido" className="">
             Ir al Carrito ({cart.length})
