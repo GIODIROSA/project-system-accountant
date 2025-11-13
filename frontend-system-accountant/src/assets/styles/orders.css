@@ -1,0 +1,37 @@
+.order-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.order-layout {
+  display: flex;
+  justify-content: space-between;
+  gap: 4rem;
+  align-items: flex-start;
+}
+
+.order-button {
+  padding: 10px 5px;
+  border: 2px solid #161518;
+  background-color: #fff;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: max-content;
+}
+
+.order-section-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1rem;
+  align-items: stretch;
+  padding: 20px;
+  border: 2px solid #b2bec3;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #F8D0AA;
+  min-width: 600px;
+  min-height: 600px;
+  border-radius: 12px;
+}

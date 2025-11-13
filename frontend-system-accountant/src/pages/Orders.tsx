@@ -4,6 +4,8 @@ import { getUserByEmail } from '../services/userService';
 import { useUserStore } from '../store/useUserStore';
 import type { User } from '../types/Users';
 import { Link } from 'react-router-dom';
+import '../assets/styles/orders.css';
+
 
 const UserCheck: React.FC<{ onUserFound: (user: User) => void; onUserNotFound: (email: string) => void }> = ({ onUserFound, onUserNotFound }) => {
   const [email, setEmail] = useState('');
@@ -42,15 +44,15 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newUser = { 
-      nombre: nombre.trim(), 
-      apellido: apellido.trim(), 
-      email: email.trim(), 
-      telefono 
+    const newUser = {
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      email: email.trim(),
+      telefono
     };
     await registerUser(newUser);
     const user = useUserStore.getState().user;
-    if(user) {
+    if (user) {
       onUserCreated(user);
     }
   };
@@ -171,17 +173,29 @@ export default function Orders() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Crear Nuevo Pedido</h1>
-      <div className="flex justify-end mb-4">
-        <Link to="/producto" className="bg-gray-500 text-white px-4 py-2 rounded">
-          Volver a Productos
-        </Link>
-      </div>
-      <div>
-        <UserSection />
-        <Cart cart={cart} clearCart={clearCart} createOrder={handleCreateOrder} user={user} />
-      </div>
+    <div className="order-container order-layout mx-auto p-4">
+
+      <section className="flex flex-col mb-6">
+        <h1 className="text-3xl font-bold mb-6">Crear Nuevo Pedido</h1>
+        <div className="order-button">
+          <Link to="/producto" className="bg-gray-500 text-white px-4 py-2 rounded">
+            Volver a Productos
+          </Link>
+        </div>
+      </section>
+
+      <section className="order-section-container">
+
+        <div>
+          <UserSection />
+        </div>
+
+        <div>
+          <Cart cart={cart} clearCart={clearCart} createOrder={handleCreateOrder} user={user} />
+        </div>
+
+      </section>
+
     </div>
   );
 }

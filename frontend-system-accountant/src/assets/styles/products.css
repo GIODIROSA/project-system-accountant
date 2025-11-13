@@ -1,0 +1,88 @@
+.producto-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.producto-layout {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.producto-button {
+  padding: 10px 5px;
+  border: 1px solid #000;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.producto-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #636e72;
+  transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out;
+}
+
+.producto-card:hover {
+  background-color: #ffbd9a;
+  border-color: #ff7675;
+}
+
+.producto-container-list {
+  height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #fde9c7;
+  padding: 20px;
+  margin: 2rem 0;
+  border-radius: 12px;
+}
+
+.producto-button-added {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.producto-button-decrease,
+.producto-button-increase {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.producto-button-decrease:hover,
+.producto-button-increase:hover {
+  background-color: #FFF;
+}
+
+.producto-button-decrease:active,
+.producto-button-increase:active {
+  background-color: #c7b65d;
+  color: white;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transform: scale(0.9);
+}
+
+.producto-title-descrip{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}

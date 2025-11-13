@@ -12,11 +12,11 @@ export const Itemproduct: React.FC<ItemProductProps> = ({ productos }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+    <section className="producto-container-list">
       {productos.map((producto) => (
         console.log("Producto en Itemproduct:", producto),
         <ProductCard key={producto.id_producto} producto={producto} />
       ))}
-    </div>
+    </section>
   );
 };
