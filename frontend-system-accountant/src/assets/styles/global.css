@@ -17,4 +17,10 @@
 .bg-button{
     background-color: #bddfab;
     color: #fff;
+    transition: background-color 0.5s ease-in-out;
+}
+
+.bg-button:hover{
+    background-color: #7bb390;
+    color: #111f27;
 }

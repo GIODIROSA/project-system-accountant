@@ -44,7 +44,7 @@
   padding: 1rem;
   margin-bottom: 1rem;
   border: 1px solid #636e72;
-  transition: background-color 0.5s ease-in-out, border-color 0.5s ease-in-out;
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 .producto-card:hover {
