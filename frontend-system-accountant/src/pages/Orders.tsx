@@ -9,10 +9,26 @@ import '../assets/styles/orders.css';
 
 const UserCheck: React.FC<{ onUserFound: (user: User) => void; onUserNotFound: (email: string) => void }> = ({ onUserFound, onUserNotFound }) => {
   const [email, setEmail] = useState('');
+  const [isValidEmail, setIsValidEmail] = useState(true);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    setIsValidEmail(validateEmail(newEmail));
+  };
 
   const handleCheckUser = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
+    if (!validateEmail(trimmedEmail)) {
+      setIsValidEmail(false);
+      return;
+    }
     const user = await getUserByEmail(trimmedEmail);
     if (user) {
       onUserFound(user);
@@ -22,13 +38,22 @@ const UserCheck: React.FC<{ onUserFound: (user: User) => void; onUserNotFound: (
   };
 
   return (
-    <form onSubmit={handleCheckUser} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
+    <form onSubmit={handleCheckUser} className="order-form-user p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
       <h2 className="text-2xl font-bold mb-4">Verificar Usuario</h2>
       <div className="mb-4">
-        <label className="block text-gray-700">Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border rounded" required />
+        <label className=" block text-gray-700">Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={handleEmailChange}
+          className={`order-input-email w-full p-2 border rounded ${!isValidEmail && email.length > 0 ? 'border-red-500' : ''}`}
+          required
+        />
+        {!isValidEmail && email.length > 0 && (
+          <p className="text-red-500 text-sm mt-1">Por favor, introduce un correo electrónico válido (ej. usuario@dominio.com)</p>
+        )}
       </div>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button type="submit" className={`order-button-register text-white px-4 py-2 rounded ${!isValidEmail || email.length === 0 ? 'bg-gray-400 cursor-not-allowed' : ''}`} disabled={!isValidEmail || email.length === 0}>
         Verificar
       </button>
     </form>
@@ -76,7 +101,7 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
         <label className="block text-gray-700">Teléfono</label>
         <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="w-full p-2 border rounded" required />
       </div>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button type="submit" className="order-button-register text-white px-4 py-2 rounded">
         Registrar
       </button>
     </form>
@@ -125,7 +150,7 @@ const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => vo
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
       <h2 className="text-2xl font-bold mb-4">Carrito</h2>
       {cart.length === 0 ? (
-        <p>El carrito está vacío.</p>
+        <p className='color-primary'>El carrito está vacío.</p>
       ) : (
         <>
           <ul>
@@ -138,14 +163,14 @@ const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => vo
           </ul>
           <hr className="my-4" />
           <div className="flex justify-between items-center font-bold text-xl">
-            <span>Total</span>
+            <span className='color-primary'>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
-          <div className="flex justify-end mt-4">
-            <button onClick={clearCart} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">
+          <div className="order-button-container mt-4">
+            <button onClick={clearCart} className="order-button-clear text-white px-4 py-2 rounded mr-2">
               Limpiar Carrito
             </button>
-            <button onClick={createOrder} className="bg-green-500 text-white px-4 py-2 rounded" disabled={!user}>
+            <button onClick={createOrder} className={`text-white px-4 py-2 rounded ${!user ? 'order-button-unset cursor-not-allowed' : 'order-button-created'}`} disabled={!user}>
               Crear Pedido
             </button>
           </div>
@@ -175,10 +200,10 @@ export default function Orders() {
   return (
     <div className="order-container order-layout mx-auto p-4">
 
-      <section className="flex flex-col mb-6">
+      <section className="flex flex-col mb-6 order-gap-4">
         <h1 className="text-3xl font-bold mb-6">Crear Nuevo Pedido</h1>
-        <div className="order-button">
-          <Link to="/producto" className="bg-gray-500 text-white px-4 py-2 rounded">
+        <div className="order-button bg-button">
+          <Link to="/producto" className="color-primary">
             Volver a Productos
           </Link>
         </div>

@@ -62,7 +62,10 @@
   padding: 20px;
   margin: 2rem 0;
   border-radius: 12px;
+  width: 100%;
+  min-width: 600px;
 }
+
 
 .producto-container-list::-webkit-scrollbar {
   width: 10px;
@@ -81,6 +84,15 @@
 
 .producto-container-list::-webkit-scrollbar-thumb:hover {
   background-color: #d35400;
+}
+
+.producto-container-list .producto-load{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
 }
 
 .producto-button-added {

@@ -12,7 +12,7 @@ export const Itemproduct: React.FC<ItemProductProps> = ({ productos }) => {
   }
 
   return (
-    <section className="producto-container-list">
+    <section className="">
       {productos.map((producto) => (
         console.log("Producto en Itemproduct:", producto),
         <ProductCard key={producto.id_producto} producto={producto} />

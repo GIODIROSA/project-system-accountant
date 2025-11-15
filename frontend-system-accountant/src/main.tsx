@@ -2,11 +2,11 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-import './assets/styles/global.css';
+import "./index.css";
 
 const bgElement = {
   backgroundColor: "#f7edda",
-  height: "100vh",
+  height: "auto",
   margin: 0,
   padding: 0, 
 }

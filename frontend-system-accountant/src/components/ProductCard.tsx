@@ -2,7 +2,6 @@ import React from 'react';
 import type { Producto } from '../interface/interfaceProduct';
 import { useOrderStore } from '../store/useOrderStore';
 import '../assets/styles/products.css';
-import '../assets/styles/global.css';
 
 interface ProductCardProps {
   producto: Producto;

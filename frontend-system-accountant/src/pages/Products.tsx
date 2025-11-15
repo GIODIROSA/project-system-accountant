@@ -6,7 +6,6 @@ import { useOrderStore } from '../store/useOrderStore';
 
 // style
 import '../assets/styles/products.css';
-import '../assets/styles/global.css';
 
 const Productos: React.FC = () => {
   const productos = useProductoStore((state) => state.productos);
@@ -23,18 +22,22 @@ const Productos: React.FC = () => {
       <div className="producto-container-header">
         <h1 className="color-primary">Nuestros Productos</h1>
         <button className='producto-button bg-button'>
-          <Link to="/pedido" className="">
+          <Link to="/pedido" className="color-primary">
             Ir al Carrito ({cart.length})
           </Link>
         </button>
       </div>
 
-      <section>
+      <section className='producto-container-list'>
 
         {productos.length > 0 ? (
           <Itemproduct productos={productos} />
         ) : (
-          <p className='color-primary'>Cargando productos...</p>
+          <div className='producto-load flex flex-col items-center justify-center h-64'>
+            <div className='spinner'></div>
+            <p className='color-primary mt-4'>Cargando productos...</p>
+          </div>
+
         )}
 
       </section>
