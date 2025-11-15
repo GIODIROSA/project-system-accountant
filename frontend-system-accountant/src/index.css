@@ -45,3 +45,16 @@
     transform: rotate(360deg);
   }
 }
+
+.order-modal-interno {
+  width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #DCFF96;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; 
+  gap: 1rem; 
+}

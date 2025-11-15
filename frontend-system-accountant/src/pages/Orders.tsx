@@ -1,3 +1,4 @@
+import Modal from '../components/Modal';
 import React, { useState } from 'react';
 import { useOrderStore } from '../store/useOrderStore';
 import { getUserByEmail } from '../services/userService';
@@ -46,7 +47,7 @@ const UserCheck: React.FC<{ onUserFound: (user: User) => void; onUserNotFound: (
           type="email"
           value={email}
           onChange={handleEmailChange}
-          className={`order-input-email w-full p-2 border rounded ${!isValidEmail && email.length > 0 ? 'border-red-500' : ''}`}
+          className={`order-input-custom w-full p-2 border rounded ${!isValidEmail && email.length > 0 ? 'border-red-500' : ''}`}
           required
         />
         {!isValidEmail && email.length > 0 && (
@@ -83,23 +84,23 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
+    <form onSubmit={handleSubmit} className="order-form-register p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
       <h2 className="text-2xl font-bold mb-4">Registrar Usuario</h2>
       <div className="mb-4">
-        <label className="block text-gray-700">Nombre</label>
-        <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className="w-full p-2 border rounded" required />
+        <label className="order-label block text-gray-700">Nombre</label>
+        <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className="order-input-custom w-full p-2 border rounded" required />
       </div>
       <div className="mb-4">
-        <label className="block text-gray-700">Apellido</label>
-        <input type="text" value={apellido} onChange={(e) => setApellido(e.target.value)} className="w-full p-2 border rounded" required />
+        <label className="order-label block text-gray-700">Apellido</label>
+        <input type="text" value={apellido} onChange={(e) => setApellido(e.target.value)} className="order-input-custom w-full p-2 border rounded" required />
       </div>
       <div className="mb-4">
-        <label className="block text-gray-700">Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border rounded" required />
+        <label className="order-label block text-gray-700">Email</label>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="order-input-custom w-full p-2 border rounded" required />
       </div>
       <div className="mb-4">
-        <label className="block text-gray-700">Teléfono</label>
-        <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="w-full p-2 border rounded" required />
+        <label className="order-label block text-gray-700">Teléfono</label>
+        <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="order-input-custom w-full p-2 border rounded" required />
       </div>
       <button type="submit" className="order-button-register text-white px-4 py-2 rounded">
         Registrar
@@ -125,10 +126,10 @@ const UserSection: React.FC = () => {
 
   if (user) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
-        <h2 className="text-2xl font-bold mb-4">Usuario Registrado</h2>
-        <p>Nombre: {user.nombre} {user.apellido}</p>
-        <p>Email: {user.email}</p>
+      <div className="order-user-register bg-white p-6 rounded-lg shadow-lg w-full max-w-md mb-6">
+        <h2 className="text-2xl font-bold mb-4 color-primary">Usuario Registrado</h2>
+        <p className='color-primary'>Nombre: {user.nombre} {user.apellido}</p>
+        <p className='color-primary'>Email: {user.email}</p>
       </div>
     );
   }
@@ -148,20 +149,20 @@ const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => vo
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-4">Carrito</h2>
+      <h2 className="color-primary text-2xl font-bold mb-4">Carrito</h2>
       {cart.length === 0 ? (
         <p className='color-primary'>El carrito está vacío.</p>
       ) : (
         <>
           <ul>
             {cart.map(item => (
-              <li key={item.id_producto} className="flex justify-between items-center mb-2">
+              <li key={item.id_producto} className="order-item-producto flex justify-between items-center mb-2">
                 <span>{item.nombre} x {item.quantity}</span>
                 <span>${(parseFloat(item.precio) * item.quantity).toFixed(2)}</span>
               </li>
             ))}
           </ul>
-          <hr className="my-4" />
+          <hr className="order-separador my-4" />
           <div className="flex justify-between items-center font-bold text-xl">
             <span className='color-primary'>Total</span>
             <span>${total.toFixed(2)}</span>
@@ -183,18 +184,28 @@ const Cart: React.FC<{ cart: any[], clearCart: () => void, createOrder: () => vo
 export default function Orders() {
   const { cart, addPedido, clearCart } = useOrderStore();
   const { user } = useUserStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const handleCreateOrder = async () => {
     if (!user) {
-      alert('Por favor, verifica o registra un usuario antes de crear un pedido.');
+      setModalMessage('Por favor, verifica o registra un usuario antes de crear un pedido.');
+      setIsModalOpen(true);
       return;
     }
     if (cart.length === 0) {
-      alert('El carrito está vacío.');
+      setModalMessage('El carrito está vacío.');
+      setIsModalOpen(true);
       return;
     }
     await addPedido(user, cart);
-    alert('Pedido creado con éxito!');
+    setModalMessage('Pedido creado con éxito!');
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalMessage('');
   };
 
   return (
@@ -220,6 +231,15 @@ export default function Orders() {
         </div>
 
       </section>
+
+    
+
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <p>{modalMessage}</p>
+        </Modal>
+
+      
+
 
     </div>
   );

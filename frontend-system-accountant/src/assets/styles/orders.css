@@ -27,26 +27,26 @@
 
 .order-button a {
   text-decoration: none;
-} 
+}
 
-.order-button-container{
+.order-button-container {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
   gap: 1rem;
   margin: 20px 0px;
-
 }
 
-.order-button-clear{
+.order-button-clear {
   background-color: #f21905;
 }
 
-.order-button-created{
+.order-button-created {
   background-color: #466437;
 }
 
-.order-button-clear, .order-button-created {
+.order-button-clear,
+.order-button-created {
   padding: 10px 15px;
   border: 2px solid #161518;
   border-radius: 12px;
@@ -59,8 +59,8 @@
   color: #fff;
 }
 
-.order-button-unset{
-   padding: 10px 15px;
+.order-button-unset {
+  padding: 10px 15px;
   border: 2px solid #161518;
   border-radius: 12px;
   display: flex;
@@ -69,11 +69,11 @@
   width: max-content;
   border: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  color: #EEE;
+  color: #eee;
 }
 
-.order-button-register{
-   padding: 10px 15px;
+.order-button-register, .order-button-pedido-realizado {
+  padding: 10px 15px;
   border: 2px solid #161518;
   border-radius: 12px;
   display: flex;
@@ -82,8 +82,13 @@
   width: max-content;
   border: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  color: #EEE;
+  color: #eee;
   background-color: #ff7675;
+  margin-top: 20px;
+}
+
+.order-button-register:hover {
+  background-color: #f8d0aa;
 }
 
 .order-section-container {
@@ -95,19 +100,19 @@
   padding: 20px;
   border: 2px solid #ff7675;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #F8D0AA;
+  background-color: #f8d0aa;
   min-width: 600px;
   min-height: 600px;
   border-radius: 12px;
 }
 
-.order-form-user{
+.order-form-user {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.order-input-email{
+.order-input-custom {
   border-radius: 8px;
   border: none;
   padding: 10px 15px;
@@ -115,7 +120,49 @@
   margin-top: 10px;
 }
 
-.order-gap-4{
+.order-label {
+  padding-top: 20px;
+}
+
+.order-gap-4 {
+  gap: 1rem;
+}
+
+.order-item-producto {
+  padding: 5px 0px;
+}
+
+.order-separador {
+  height: 2px;
+  padding: 1px 0px;
+  margin: 2px 0px;
+  background-color: #f21905;
+}
+
+.order-user-register {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.order-modal {
+  position: absolute;
+  top: 40%;
+  left: 2%;
+  width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #dcff96;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.order-modal-interno {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -131,8 +178,12 @@
     min-width: unset;
   }
 
-  .order-button-container{
+  .order-button-container {
     justify-content: center;
     align-items: center;
+  }
+
+  .order-modal {
+    top: 80%;
   }
 }

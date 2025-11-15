@@ -38,6 +38,7 @@
 
 .producto-card {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
@@ -66,7 +67,6 @@
   min-width: 600px;
 }
 
-
 .producto-container-list::-webkit-scrollbar {
   width: 10px;
 }
@@ -86,7 +86,7 @@
   background-color: #d35400;
 }
 
-.producto-container-list .producto-load{
+.producto-container-list .producto-load {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -147,5 +147,19 @@
   .producto-layout {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .producto-container-list {
+    min-width: unset;
+  }
+
+  .producto-title-descrip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .producto-card{
+    flex-direction: column;
+    align-items: center;  
   }
 }
