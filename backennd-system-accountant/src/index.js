@@ -12,7 +12,12 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 const corsOptions = {
-  origin: ['https://frontend-system-accountant.onrender.com', 'http://localhost:5173'],
+  origin: [
+    'https://frontend-system-accountant.onrender.com',
+    'http://localhost:5173',
+    'https://quipus.cl',
+    'https://www.quipus.cl'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
   allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 };
