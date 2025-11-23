@@ -66,10 +66,41 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
   const [apellido, setApellido] = useState('');
   const [email, setEmail] = useState(initialEmail);
   const [telefono, setTelefono] = useState('');
+  const [telefonoError, setTelefonoError] = useState<string | null>(null);
+  const [telefonoWarning, setTelefonoWarning] = useState<string | null>(null);
   const { registerUser } = useUserStore();
+
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTelefono(value);
+
+    // Clear previous errors/warnings
+    setTelefonoError(null);
+    setTelefonoWarning(null);
+
+    const chilePhoneRegex = /^\+56\d{9}$/; // +56 followed by 9 digits
+    const startsWithPlus56 = value.startsWith('+56');
+
+    if (!startsWithPlus56 && value.length > 0) {
+      setTelefonoWarning('El número de teléfono debe comenzar con +56.');
+    }
+
+    if (startsWithPlus56) {
+      if (value.length > 12) { // +56 (3 chars) + 9 digits = 12 total
+        setTelefonoError('El número de teléfono excede el límite de 9 dígitos después de +56.');
+      } else if (!chilePhoneRegex.test(value) && value.length === 12) {
+        setTelefonoError('Formato inválido. Debe ser +56 seguido de 9 dígitos.');
+      }
+    } else if (value.length > 12 && value.length > 0) { // If it doesn't start with +56 but is too long
+      setTelefonoError('El número de teléfono es demasiado largo.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (telefonoError) {
+      return; // Prevent submission if there's an error
+    }
     const newUser = {
       nombre: nombre.trim(),
       apellido: apellido.trim(),
@@ -100,9 +131,17 @@ const UserForm: React.FC<{ onUserCreated: (user: User) => void, initialEmail?: s
       </div>
       <div className="mb-4">
         <label className="order-label block text-gray-700">Teléfono</label>
-        <input type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="order-input-custom w-full p-2 border rounded" required />
+        <input
+          type="tel"
+          value={telefono}
+          onChange={handleTelefonoChange}
+          className={`order-input-custom w-full p-2 border rounded ${telefonoError ? 'border-red-500' : ''}`}
+          required
+        />
+        {telefonoWarning && <span className="text-yellow-600 text-sm mt-1 block">{telefonoWarning}</span>}
+        {telefonoError && <span className="text-red-500 text-sm mt-1 block">{telefonoError}</span>}
       </div>
-      <button type="submit" className="order-button-register text-white px-4 py-2 rounded">
+      <button type="submit" className={`order-button-register text-white px-4 py-2 rounded ${telefonoError ? 'bg-gray-400 cursor-not-allowed' : ''}`} disabled={!!telefonoError}>
         Registrar
       </button>
     </form>
