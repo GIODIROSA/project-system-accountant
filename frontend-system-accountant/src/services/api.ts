@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://backend-system-accountant.onrender.com/api', // url BASE de la API
+  baseURL: import.meta.env.VITE_API_URL || 'https://backend-system-accountant.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
